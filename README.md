@@ -1,5 +1,5 @@
 
-#JourneyWiser
+# JourneyWiser
 
 This project uses Airbnb historical data to predict the booking lead time for a given listing.
 
