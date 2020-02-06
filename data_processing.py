@@ -7,9 +7,19 @@ from pyspark.context import SparkContext
 from pyspark.sql import SparkSession, SQLContext
 from datetime import datetime, timedelta
 from bisect import bisect, bisect_left
+import psycopg2
 
+#create a SparkSession instance
+spark = SparkSession \
+            .builder \
+            .appName("Spark SQL") \
+            .config("") \
+            .getOrCreate()
 
-#-----------------------------find file--------------------------
+sc = pyspark.SparkContext.getOrCreate()
+sql = SQLContext(sc)
+
+#-----------------------------nearest neighbor dict--------------------------
 class NearestNeighborDict(dict):
         def __init__(self):
             dict.__init__(self)
@@ -47,72 +57,29 @@ class NearestNeighborDict(dict):
             return self
 
 #--------------------------- check availablity -----------------------------------
-def check_availablity(file_name,date):
+def check_availablity(file_name,date,list_id):
         path = 's3n://hodabnb/' + file_name
         df = spark.read.options(header='true', inferSchema='true').load(path,format='csv')
         df = df.select(df['listing_id'],df['date'],df['available'])
         df = df.filter(df['listing_id'] == list_id)
         df = df.filter(df['date'] == date.strftime('%Y-%m-%d %H:%M:%S'))
+        row = df.rdd.collect()
+        print(row)
         df = df.select(df['available'])
-        availablity = df.select(df['available']).collect()[0]['available']
-        if availablity == 't':
-            return(True)
-        elif availablity == 'f':
-            return(False)
+        row = df.rdd.collect()
+        print(row)
+        if len(df.head(1)) > 0:
+            availablity = df.select(df['available']).collect()[0]['available']
+            if availablity == 't':
+                return(True)
+            elif availablity == 'f':
+                return(False)
         else:
             return(None)
 
-#-----------------------------bucket object list creator---------------------------------------
-def get_object_list(city,file_type):
-    obj = []
-    file_type = file_type + '.csv'
-    s3 = boto3.resource('s3')
-    bucket = s3.Bucket('hodabnb')
-    for object in bucket.objects.all():
-       if object.key.startswith(city) and object.key.endswith(file_type):
-            obj.append(object.key)
-       else:
-            continue
-    return(obj)
-#-----------------------------------------------------------------------------------------------
-#create a SparkSession instance
-spark = SparkSession \
-            .builder \
-                .appName("Spark SQL") \
-                    .config("") \
-                        .getOrCreate()
-
-#user inputs
-trip_date_str = '2020-03-05'
-list_id = '20168'
-city = 'amsterdam'
-
-
-sc = pyspark.SparkContext.getOrCreate()
-sql = SQLContext(sc)
-
-#find the last year date
-trip_date_obj = datetime.strptime(trip_date_str, '%Y-%m-%d')
-last_year_obj = trip_date_obj - timedelta(days=365)
-six_month_ago_obj = last_year_obj - timedelta(days=180)
-last_year_str = last_year_obj.strftime('%Y-%m-%d')
-
-
-#find the file to look
-D = NearestNeighborDict()
-calendar_files = get_object_list (city, 'calendar')
-listings_file = get_object_list (city, 'listings')
-
-for file_name in calendar_files:
-    file_date = file_name.split('_')[1]
-    D [file_date] = file_name
-
-
-it = D(last_year_str)
-for i in it:
-    if datetime.strptime(i, '%Y-%m-%d') < six_month_ago_obj: 
-        break
-    availablity = check_availablity(D[i],last_year_obj)
-    print('\n\n'+i)
-    print(availablity)
-
+#------------------------------for a given listing id  generate furure date up to one year from  now and add it to lead_time table----------------
+#def generate_future_date(listing_id)
+#    today = datetime.now()
+#    for i in range(365)+1:
+#        future = today + timedelta(days=i)
+        
