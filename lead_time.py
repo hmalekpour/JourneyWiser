@@ -29,7 +29,7 @@ conn = psycopg2.connect(database="postgres", user="postgres", host="ec2-18-191-2
 cursor = conn.cursor()  
 
 city_list = get_city_list('hodabnb')
-today = datetime.now()
+today = datetime.strptime(datetime.now().strftime('%Y-%m-%d'),'%Y-%m-%d')
 
 for city in city_list:
     
@@ -38,7 +38,7 @@ for city in city_list:
     else:
         continue
 
-    #create list of files avialbale for the city and assing it to NearestNeighborDict
+    #create list of files avialbale for the city and assign it to NearestNeighborDict
     D = NearestNeighborDict()
     file_list = get_object_list (city, 'calendar.csv', 'hodabnb')
     for file_name in file_list:
@@ -54,13 +54,17 @@ for city in city_list:
     listings = cursor.fetchall()
     for listing in listings:
         list_id = listing[0]
-        if list_id != 44680:
-            continue
+        
+        #find the primary key of listing table for each listing
+        cursor.execute("SELECT id FROM listing WHERE listing_id = %s" % list_id)
+        list_table_id = cursor.fetchall()[0][0] 
+
         for d in range(1,365):
             date = today + timedelta(days=d)
+            datestr = date.strftime('%Y-%m-%d')
             date_1y_ago = date - timedelta(days=364)
             datestr_1y_ago = date_1y_ago.strftime('%Y-%m-%d')
-            date_stop_search = date_1y_ago - timedelta(days=182)
+            date_stop_search = date_1y_ago - timedelta(days=120)
             
             it = D(datestr_1y_ago)
             for i in it:
@@ -70,15 +74,23 @@ for city in city_list:
 
                 availablity = check_availablity(D[i], date_1y_ago, list_id)
                 if availablity == True:   
-                    lead_time = date_1y_ago - datetime.strptime(i,'%Y-%m-%d')
+                    lead_time = (date_1y_ago - datetime.strptime(i,'%Y-%m-%d')).days
+                    print(lead_time)
                     break
                 if availablity == None:
                     lead_time = -2
                     break
  
-            print('\n\n\n')            
-            print('date_1y_ago: ' + datestr_1y_ago)
-            print('list_id: %s' % list_id)
-            print(lead_time)
-            print('\n\n\n')
+            # Insert data to table
+
+            #find the primary key of listing table for each listing
+            cursor.execute("SELECT id FROM listing WHERE listing_id = %s" % list_id)
+            list_table_id = cursor.fetchall()[0][0]
+            print('INSERT INTO lead_time ( list_table_id, travel_date, lead_time_1y ) VALUES ( %s, DATE \'%s\', %s )' %  (list_table_id, datestr, lead_time) ) 
+            cursor.execute('INSERT INTO lead_time ( list_table_id, travel_date, lead_time_1y ) VALUES ( %s, DATE \'%s\', %s )' %  (list_table_id, datestr, lead_time) )
+            conn.commit() # <--- makes sure the change is shown in the database
+    
+    cursor.close()
+    conn.close()
+            
 

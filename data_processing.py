@@ -58,16 +58,22 @@ class NearestNeighborDict(dict):
 
 #--------------------------- check availablity -----------------------------------
 def check_availablity(file_name,date,list_id):
+        #create a SparkSession instance
+        spark = SparkSession \
+                .builder \
+                .appName("Spark SQL") \
+                .config("") \
+                .getOrCreate()
+
+        sc = pyspark.SparkContext.getOrCreate()
+        sql = SQLContext(sc)
+        
         path = 's3n://hodabnb/' + file_name
-        df = spark.read.options(header='true', inferSchema='true').load(path,format='csv')
+        df = spark.read.format('com.databricks.spark.csv').options(header='true', inferSchema='true').load(path)
         df = df.select(df['listing_id'],df['date'],df['available'])
         df = df.filter(df['listing_id'] == list_id)
-        df = df.filter(df['date'] == date.strftime('%Y-%m-%d %H:%M:%S'))
-        row = df.rdd.collect()
-        print(row)
+        df = df.filter(df['date'] == date)
         df = df.select(df['available'])
-        row = df.rdd.collect()
-        print(row)
         if len(df.head(1)) > 0:
             availablity = df.select(df['available']).collect()[0]['available']
             if availablity == 't':
