@@ -8,8 +8,6 @@ The lead time prediction is made by ingesting and analyzing 480 GB of historical
 
 ![image description](images/plugin.png)
 
-## Installation
-
 ## Pipeline Architecture
 The raw data were uncompressed and uploaded to s3 in csv format. The data was then batch processed in spark and the processed data was fed to postgresql. Finally the data was visualized using flak and chrome plogin.
 ![image description](images/pipeline.png)
@@ -18,4 +16,4 @@ The raw data were uncompressed and uploaded to s3 in csv format. The data was th
 470GB data provided by [insideairbnb.com](http://insideairbnb.com/get-the-data.html).
 
 ## Engineering challenges
-
+Many S3 access requests degrades the batch processing efficiency. The issue was resolved by cashing the data required for each city into spark. The other challenge was the high throuput causing slow batch processing. Considering Spark's lazy evaluation, the issue was improved by parallelizing batch processing algorithm in order to minimize trigering spark actions and thus take the most advanatage out of spark cluster computing.
