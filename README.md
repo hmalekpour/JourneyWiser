@@ -11,7 +11,7 @@ The lead time prediction is made by ingesting and analyzing 480 GB of historical
 
 ## Pipeline Architecture
 The raw data were uncompressed and uploaded to s3 in csv format. The data was then batch processed in spark and the processed data was fed to postgresql. Finally the data was visualized using flak and chrome plogin.
-[image description] 'images/pipeline.png'
+![image description] (images/pipeline.png)
 
 ## Dataset
 470GB data provided by [insideairbnb.com](http://insideairbnb.com/get-the-data.html).
