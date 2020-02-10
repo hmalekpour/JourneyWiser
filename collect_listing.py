@@ -20,8 +20,7 @@ def find_max_date(datestr_list):
     return(maxstr)
 
 
-
-#create a SparkSession instance
+# Create a SparkSession instance
 spark = SparkSession \
             .builder \
                 .appName("Spark SQL") \
@@ -45,7 +44,7 @@ city_list = get_city_list('hodabnb')
 city_date = {}
 
 for city in city_list:
-    if city == 'san-francisco':
+    if city == 'antwerp':
         pass
     else:
         continue
