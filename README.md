@@ -16,4 +16,4 @@ The raw data were uncompressed and uploaded to s3 in csv format. The data was th
 470GB data provided by [insideairbnb.com](http://insideairbnb.com/get-the-data.html).
 
 ## Engineering challenges
-Many S3 access requests degrades the batch processing efficiency. The issue was resolved by cashing the data required for each city into spark. The other challenge was the high throuput causing slow batch processing. Considering Spark's lazy evaluation, the issue was improved by parallelizing batch processing algorithm in order to minimize trigering spark actions and thus take the most advanatage out of spark cluster computing.
+Many S3 access requests degrades the batch processing efficiency. The issue was resolved by cashing the data required for each city into spark. The other challenge was the high throughput causing slow batch processing. Considering Spark's lazy evaluation, the issue was improved by parallelizing batch processing algorithm in order to minimize triggering spark actions and thus take the most advantage out of spark cluster computing.
