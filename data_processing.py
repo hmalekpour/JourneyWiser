@@ -8,16 +8,8 @@ from pyspark.sql import SparkSession, SQLContext
 from datetime import datetime, timedelta
 from bisect import bisect, bisect_left
 import psycopg2
+import time
 
-#create a SparkSession instance
-spark = SparkSession \
-            .builder \
-            .appName("Spark SQL") \
-            .config("") \
-            .getOrCreate()
-
-sc = pyspark.SparkContext.getOrCreate()
-sql = SQLContext(sc)
 
 #-----------------------------nearest neighbor dict--------------------------
 class NearestNeighborDict(dict):
@@ -56,36 +48,5 @@ class NearestNeighborDict(dict):
                 self.iter_index = index
             return self
 
-#--------------------------- check availablity -----------------------------------
-def check_availablity(file_name,date,list_id):
-        #create a SparkSession instance
-        spark = SparkSession \
-                .builder \
-                .appName("Spark SQL") \
-                .config("") \
-                .getOrCreate()
 
-        sc = pyspark.SparkContext.getOrCreate()
-        sql = SQLContext(sc)
-        
-        path = 's3n://hodabnb/' + file_name
-        df = spark.read.format('com.databricks.spark.csv').options(header='true', inferSchema='true').load(path)
-        df = df.select(df['listing_id'],df['date'],df['available'])
-        df = df.filter(df['listing_id'] == list_id)
-        df = df.filter(df['date'] == date)
-        df = df.select(df['available'])
-        if len(df.head(1)) > 0:
-            availablity = df.select(df['available']).collect()[0]['available']
-            if availablity == 't':
-                return(True)
-            elif availablity == 'f':
-                return(False)
-        else:
-            return(None)
 
-#------------------------------for a given listing id  generate furure date up to one year from  now and add it to lead_time table----------------
-#def generate_future_date(listing_id)
-#    today = datetime.now()
-#    for i in range(365)+1:
-#        future = today + timedelta(days=i)
-        
