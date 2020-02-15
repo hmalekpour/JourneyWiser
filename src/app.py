@@ -17,12 +17,12 @@ def query(list_id, date):
     cursor = conn.cursor()
 
     # find the primary key of listing table for the given listing_id
-    cursor.execute("SELECT id FROM listing WHERE listing_id = %s" % list_id)
-    list_table_id = cursor.fetchall()[0][0]
+    #cursor.execute("SELECT id FROM listing WHERE listing_id = %s" % list_id)
+    #list_table_id = cursor.fetchall()[0][0]
 
     # get the lead time data for the given date
 
-    cursor.execute("""SELECT lead_time_1y FROM lead_time WHERE list_table_id = %(list_id)s AND travel_date = %(date)s""", {"list_id": list_table_id, "date": dt.datetime.strptime(date,"%Y-%m-%d").date()})
+    cursor.execute("""SELECT "min(lead_time)" FROM lead_time_prediction WHERE listing_id = %(listing_id)s AND date = %(date)s""", {"listing_id": list_id, "date": dt.datetime.strptime(date,"%Y-%m-%d").date()})
     rows = cursor.fetchall()
     
     #for row in rows:
@@ -44,10 +44,13 @@ def check_listing():
     # your logic to get the result
     rows = query(req_id, req_date)
     if len(rows) == 0:
-        return "Not found!"
+        return "No data availabe!"
     else:
         ret = rows[0][0]
-        return "Lead time is {} days.".format(ret) 
+        if ret == 999:
+            return "Fully Booked!"
+        else:
+            return "Lead time is {} days.".format(ret) 
     #"Response from AWS = " + str(rows) + ". Checking availability for listing with id = " + req_id + " and date = " + req_date
 
 if __name__ == '__main__':

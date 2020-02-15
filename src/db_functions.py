@@ -1,19 +1,30 @@
-import boto3
-import io
-import pandas as pd
-import pyspark
-from pyspark import SparkConf
-from pyspark.context import SparkContext
-from pyspark.sql import SparkSession, SQLContext
-from datetime import datetime, timedelta
-from bisect import bisect, bisect_left
 import psycopg2
 
 
-def db_insert(command):
+def db_insert(db_name, user_name, host, port, command):
+    """
+    method used to establish connection and give an insertion command to database.
+    ...
 
+    Parameters:
+    -----------
+    db_name : str
+        name of data base
+    user_name : str
+        database user name
+    host : str
+        database host address
+    port : int
+        port number to be used for database connection
+    command : str
+        the insertion command in sql
+
+    Returns:
+    --------
+    None
+    """
     #DB connection
-    conn = psycopg2.connect(database="postgres", user="postgres", host="ec2-18-191-205-97.us-east-2.compute.amazonaws.com", port=5432)
+    conn = psycopg2.connect(database = db_name, user = user_name, host = host, port = port)
 
     # create a psycopg2 cursor that can execute queries
     cursor = conn.cursor()
@@ -26,10 +37,32 @@ def db_insert(command):
     cursor.close()
     conn.close()
 
-def db_get(command):
 
+def db_get(db_name, user_name, host, port, command):
+    """
+    method used to establish a database connection, give an query command and return the results.
+    ...
+
+    Parameters:
+    -----------
+    db_name : str
+        name of data base
+    user_name : str
+        database user name
+    host : str
+        database host address
+    port : int
+        port number to be used for database connection
+    command : str
+        database querry in sql
+
+    Returns:
+    --------
+    rows : list
+        rows queried from database as a list of touples, empty list if none found.
+    """
         #DB connection
-        conn = psycopg2.connect(database="postgres", user="postgres", host="ec2-18-191-205-97.us-east-2.compute.amazonaws.com", port=5432)
+        conn = psycopg2.connect(database = db_name, user = user_name, host = host, port = port)
 
         # create a psycopg2 cursor that can execute queries
         cursor = conn.cursor()
