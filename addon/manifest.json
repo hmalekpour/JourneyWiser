@@ -9,6 +9,7 @@
   },
   "permissions": [
     "activeTab",
-    "http://18.221.216.108/*"
+    "http://18.221.216.108/*",
+    "notifications"
   ]
 }

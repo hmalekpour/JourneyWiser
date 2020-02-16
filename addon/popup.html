@@ -1,14 +1,17 @@
 <!doctype html>
 <html>
   <head>
-    <title>Journeyvisor</title>
+    <link rel="stylesheet" href="styles.css">
+    <title>Journeywiser</title>
     <script src="popup.js"></script>
   </head>
   <body>
-    <h3>JourneyWiser can provide the availability of this listing.</h3>
+    <h3>Please select your travel date to to learn more about the availablity</h3>
     <input id = "date-picker" type="date" id="start" name="trip-start"
-       value="2018-07-22"
-       min="2018-01-01" max="2020-12-31">
-    <button id="checkPage">Check this listing now!</button>
+       value="2020-01-01"
+       min="2020-01-01" max="2021-01-01">
+    <button id="checkPage">Check this date</button>
+    <h3 id = "lead-time" style = "color : rgb(24, 139, 8)"></h3>
+    <h3 id = "month-avg" style = "color : rgb(24, 139, 8)"></h3>
   </body>
 </html>
