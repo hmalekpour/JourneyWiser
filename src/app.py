@@ -26,11 +26,8 @@ def query(list_id, date):
     cursor.execute("""SELECT AVG("min(lead_time)") FROM lead_time_prediction WHERE listing_id = %(listing_id)s AND EXTRACT(MONTH FROM date) = %(month)s AND "min(lead_time)" != 999""", {"listing_id": list_id, "month": dt.datetime.strptime(date,"%Y-%m-%d").month})
     
     r2 = cursor.fetchall()
-    #get the anual average lead_time for selected listing 
-    #cursor.execute("""SELECT AVG("min(lead_time)") FROM lead_time_prediction WHERE listing_id = %(listing_id)s AND EXTRACT(YEAR FROM date) = %(year)s AND "min(lead_time)" != 999""", {"listing_id": list_id, "year": dt.datetime.strptime(date,"%Y-%m-%d").year})
 
-    #r3 = cursor.fetchall()
-    #close DV connection
+    #close DB connection
     cursor.close()
     conn.close()
     results=[r1,r2]
@@ -39,7 +36,7 @@ def query(list_id, date):
 @app.route('/')
 def hello():
     print("Incoming request")
-    return "connected!"
+    return "Hello!"
 
 @app.route('/check-listing')
 def check_listing():
@@ -52,7 +49,6 @@ def check_listing():
     else:
         lead_time = rows[0][0][0]
         month_avg = int(rows[1][0][0])
-       #year_avg = int(rows[2][0][0])
         return("%s,%s" %(lead_time, month_avg))
     
     
