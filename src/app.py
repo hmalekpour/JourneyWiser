@@ -19,15 +19,19 @@ def query(list_id, date):
 
     # get the lead time data for the given date
     cursor.execute("""SELECT "min(lead_time)" FROM lead_time_prediction WHERE listing_id = %(listing_id)s AND date = %(date)s""", {"listing_id": list_id, "date": dt.datetime.strptime(date,"%Y-%m-%d").date()})
-    
-    #fetch the data
-    rows = cursor.fetchall()
 
-    #close DV connection
+    r1 = cursor.fetchall()
+    
+    #get the average lead time for selected month
+    cursor.execute("""SELECT AVG("min(lead_time)") FROM lead_time_prediction WHERE listing_id = %(listing_id)s AND EXTRACT(MONTH FROM date) = %(month)s AND "min(lead_time)" != 999""", {"listing_id": list_id, "month": dt.datetime.strptime(date,"%Y-%m-%d").month})
+    
+    r2 = cursor.fetchall()
+
+    #close DB connection
     cursor.close()
     conn.close()
-    
-    return rows
+    results=[r1,r2]
+    return results
 
 @app.route('/')
 def hello():
@@ -39,14 +43,14 @@ def check_listing():
     req_id = request.args.get('id')
     req_date = request.args.get('date')
     rows = query(req_id, req_date)
-    if len(rows) == 0:
-        return "No data availabe!"
+    
+    if len(rows[0]) == 0:
+        return("")
     else:
-        ret = rows[0][0]
-        if ret == 999:
-            return "Fully Booked!"
-        else:
-            return "Lead time is {} days.".format(ret) 
+        lead_time = rows[0][0][0]
+        month_avg = int(rows[1][0][0])
+        return("%s,%s" %(lead_time, month_avg))
+    
     
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=80)
