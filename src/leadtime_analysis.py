@@ -18,7 +18,7 @@ The lead times are extracted for all the listings in the city and for each listi
 The results are stored in database to be used in the app.
 """
 
-def main:
+def main():
     #constants used to establish connection to postgres database
     DB_NAME = "postgres" 
     USER_NAME = "postgres"
@@ -31,10 +31,10 @@ def main:
     cursor = conn.cursor()  
 
     # Configure spark SQL
-    conf = (SparkConf() \
-            .setAppName("Process") \
-            .set("spark.executor.instances", "4") \
-            .set("spark.driver.memory", "50g") 
+    conf = (SparkConf()\
+            .setAppName("Process")\
+            .set("spark.executor.instances", "4")\
+            .set("spark.driver.memory", "50g")\
             .set("spark.executor.memory", "6g"))
     sc = SparkContext(conf=conf)
     sc.setLogLevel("ERROR")
@@ -45,6 +45,11 @@ def main:
     today = datetime.strptime(datetime.now().strftime('%Y-%m-%d'),'%Y-%m-%d')
 
     for city in city_list:
+        if city == 'venice':
+            pass
+        else:
+            continue
+
         df_dates = []
         #create list of files avialbale for the city and assign it to NearestNeighborDict
         D = NearestNeighborDict()

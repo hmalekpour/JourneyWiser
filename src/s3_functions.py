@@ -51,5 +51,5 @@ def get_city_list(bucket):
     for object in bucket.objects.all():
         city = object.key.split('_')[0]
         if city not in cities:
-            cities.append(c)
+            cities.append(city)
     return(cities)

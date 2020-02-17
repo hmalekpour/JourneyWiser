@@ -19,7 +19,7 @@ Steps:
 """
 
 
-def main:
+def main():
     URL = 'http://insideairbnb.com/get-the-data.html'
     conn = urllib2.urlopen(URL)
     html = conn.read()

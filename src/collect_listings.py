@@ -35,7 +35,7 @@ def find_max_date(datestr_list):
     maxstr = max.strftime('%Y-%m-%d')
     return(maxstr)
 
-def main:
+def main():
     
     #constants used to establish connection to postgres database
     DB_NAME = "postgres" 
