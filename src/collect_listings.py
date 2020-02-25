@@ -40,7 +40,7 @@ def main():
     #constants used to establish connection to postgres database
     DB_NAME = "postgres" 
     USER_NAME = "postgres"
-    HOST = "ec2-18-191-205-97.us-east-2.compute.amazonaws.com"
+    HOST = "ec2-18-223-205-169.us-east-2.compute.amazonaws.com"
     PORT = 5432
 
 # Create a SparkSession instance
