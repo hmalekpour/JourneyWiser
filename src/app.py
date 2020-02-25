@@ -2,15 +2,16 @@ from flask import Flask
 from flask import request
 import psycopg2
 import datetime as dt
+from datetime import timedelta
 
 app = Flask(__name__)
 
-def query(list_id, date):
+def find_leadtime(list_id, date):
     
     #constants used to establish connection to postgres database
     DB_NAME = "postgres" 
     USER_NAME = "postgres"
-    HOST = "ec2-18-191-205-97.us-east-2.compute.amazonaws.com"
+    HOST = "ec2-18-223-205-169.us-east-2.compute.amazonaws.com"
     PORT = 5432
 
     #DB connection
@@ -18,13 +19,13 @@ def query(list_id, date):
     cursor = conn.cursor()
 
     # get the lead time data for the given date
-    cursor.execute("""SELECT "min(lead_time)" FROM lead_time_prediction WHERE listing_id = %(listing_id)s AND date = %(date)s""", {"listing_id": list_id, "date": dt.datetime.strptime(date,"%Y-%m-%d").date()})
-
+    cursor.execute("""SELECT "min(lead_time)" FROM leadtime_history WHERE listing_id = %(listing_id)s AND date = %(date)s"""\ 
+                    , {"listing_id": list_id, "date": (dt.datetime.strptime(date,"%Y-%m-%d")-timedelta(days=364)).date()})
     r1 = cursor.fetchall()
     
     #get the average lead time for selected month
-    cursor.execute("""SELECT AVG("min(lead_time)") FROM lead_time_prediction WHERE listing_id = %(listing_id)s AND EXTRACT(MONTH FROM date) = %(month)s AND "min(lead_time)" != 999""", {"listing_id": list_id, "month": dt.datetime.strptime(date,"%Y-%m-%d").month})
-    
+    cursor.execute("""SELECT AVG("min(lead_time)") FROM leadtime_history WHERE listing_id = %(listing_id)s AND EXTRACT(MONTH FROM date) = %(month)s AND "min(lead_time)" != 999 AND "min(lead_time)" < 120 """\
+                    , {"listing_id": list_id, "month": dt.datetime.strptime(date,"%Y-%m-%d").month})
     r2 = cursor.fetchall()
 
     #close DB connection
@@ -42,7 +43,7 @@ def hello():
 def check_listing():
     req_id = request.args.get('id')
     req_date = request.args.get('date')
-    rows = query(req_id, req_date)
+    rows = find_leadtime(req_id, req_date)
     
     if len(rows[0]) == 0:
         return("")
