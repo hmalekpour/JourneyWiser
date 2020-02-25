@@ -16,4 +16,26 @@ The raw data were uncompressed and uploaded to s3 in csv format. The data was th
 470GB data provided by [insideairbnb.com](http://insideairbnb.com/get-the-data.html).
 
 ## Engineering challenges
-Many S3 access requests degrades the batch processing efficiency. The issue was resolved by cashing the data required for each city into spark. The other challenge was the high throughput causing slow batch processing. Considering Spark's lazy evaluation, the issue was improved by parallelizing batch processing algorithm in order to minimize triggering spark actions and thus take the most advantage out of spark cluster computing.
+### S3 Access
+Many S3 access requests degrades the batch processing efficiency. The issue was resolved by fetching the data required for each city into a dictionary consist of spark dataframes. 
+
+### Batching Performance Optimization
+The other challenge was the high throughput causing slow batch processing. Considering Spark's lazy evaluation, the issue was improved by parallelizing batch processing algorithm in order to minimize triggering spark actions and thus take the most advantage out of spark cluster computing.
+
+To achieve this, for each city all the dataframes were merged to a single dataframe and the scrape date of each was added as a new column. After filtering, the data were grouped by date and listing id and followed by aggragation (minimum leadtime value). Finally all the processed data was written to database at once.
+
+```
+df_all = reduce(DataFrame.unionAll, dfs)
+df_all.withColumn('lead_time',when(df_all['available'] == 't', datediff(df_all['date'],df_all['scrape_date']))
+df_all.groupBy('date','listing_id').agg({'lead_time': 'min'})
+df_city.write.format('jdbc')...
+```
+![image description](images/spark_optimization.png)
+
+### Database Query Optimization
+Due to the large amount of data stored in database, queries could take a long time to process. To resolve the issue the table containing the lead time values was sorted and indexed based on listing ids.
+
+```
+CREATE INDEX listingid_asc ON leadtime_history (listing_id ASC);
+```
+
