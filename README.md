@@ -6,7 +6,7 @@ The lead time prediction is made by ingesting and analyzing 480 GB of historical
 
 [link to slides](https://docs.google.com/presentation/d/1vo_jyTEAO1pe561yQhm0KKI3HU9puxuBQUplZ-Yy1w0/edit#slide=id.g6e15d5f2f7_0_126)
 
-![image description](images/plugin.png)
+![image description](images/plugin.png  | width=100)
 
 ## Pipeline Architecture
 The raw data were uncompressed and uploaded to s3 in csv format. The data was then batch processed in spark and the processed data was fed to postgresql. Finally the data was visualized using flak and chrome plogin.
