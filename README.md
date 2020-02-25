@@ -6,7 +6,9 @@ The lead time prediction is made by ingesting and analyzing 480 GB of historical
 
 [link to slides](https://docs.google.com/presentation/d/1vo_jyTEAO1pe561yQhm0KKI3HU9puxuBQUplZ-Yy1w0/edit#slide=id.g6e15d5f2f7_0_126)
 
-![image description](images/plugin.png  | width=100)
+<p align="center">
+    <img src = "./images/plugin.png" class = "center" width="500">
+</p>
 
 ## Pipeline Architecture
 The raw data were uncompressed and uploaded to s3 in csv format. The data was then batch processed in spark and the processed data was fed to postgresql. Finally the data was visualized using flak and chrome plogin.
@@ -15,12 +17,12 @@ The raw data were uncompressed and uploaded to s3 in csv format. The data was th
 ## Dataset
 470GB data provided by [insideairbnb.com](http://insideairbnb.com/get-the-data.html).
 
-## Engineering challenges
+## Performance Optimizations
 ### S3 Access
 Many S3 access requests degrades the batch processing efficiency. The issue was resolved by fetching the data required for each city into a dictionary consist of spark dataframes. 
 
 ### Batching Performance Optimization
-The other challenge was the high throughput causing slow batch processing. Considering Spark's lazy evaluation, the issue was improved by parallelizing batch processing algorithm in order to minimize triggering spark actions and thus take the most advantage out of spark cluster computing.
+Considering Spark's lazy evaluation, the batching performance was improved by parallelizing batch processing algorithm in order to minimize triggering spark actions and thus take the most advantage out of spark cluster computing.
 
 To achieve this, for each city all the dataframes were merged to a single dataframe and the scrape date of each was added as a new column. After filtering, the data were grouped by date and listing id and followed by aggragation (minimum leadtime value). Finally all the processed data was written to database at once.
 
